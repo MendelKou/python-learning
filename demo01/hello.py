@@ -30,7 +30,7 @@
 # print(enc)
 # print(chr(enc))
 
-# bytes = '李明'.encode('utf-8')
+# bytes = '寇梦德'.encode('utf-8')
 # print(bytes)
 # print(bytes.decode('utf-8'))
 
@@ -2039,3 +2039,140 @@ import json
 #     # 创建新线程处理此连接
 #     t = threading.Thread(target=tcplink,args=(sock,addr))
 #     t.start()
+
+# email 发送邮件
+# from email import encoders
+# from email.header import Header
+# from email.mime.text import MIMEText
+# from email.mime.base import MIMEBase
+# from email.mime.multipart import MIMEMultipart
+# from email.utils import parseaddr,formataddr
+# import smtplib
+# email_config = {
+#     'from_addr' : 'kmd6174@163.com',
+#     'password' : 'kmd/6174',
+#     'smtp_addr' : 'smtp.163.com'
+# }
+# def _format_addr(s):
+#     name,addr = parseaddr(s)
+#     return formataddr((Header(name,'utf-8').encode(),addr))
+
+#收件人邮箱列表
+# to_list = ['1509102310@qq.com','kmd6174@sohu.com']
+
+#文本邮件 start
+# msg = MIMEText('hello, send by Python...','plain','utf-8')
+#文本邮件 end
+
+#HTML邮件 start
+# msg = MIMEText('<html><body><h1>Hello</h1><p>send by <a href="http://www.python.org">Python...</a></p></body></html>','html','utf-8')
+#HTML邮件 end
+
+# 同时支持HTML和plain格式 start
+# 当用户不支持HTML时自动降级查看plain格式
+# msg = MIMEMultipart('alternative')
+# msg.attach(MIMEText('plain text','plain','utf-8'))
+# msg.attach(MIMEText('<html><body><h1>html text</h1></body></html>','html','utf-8'))
+# 同时支持HTML和plain格式 end
+
+#带附件的邮件 start
+# msg = MIMEMultipart() #邮件对象
+#带附件的文本邮件 start
+# msg.attach(MIMEText('an email with file...','plain','utf-8'))
+#带附件的文本邮件 end
+#将图片嵌入的html邮件 start
+# msg.attach(MIMEText('<html><body><h1>Hello</h1><p><img src="cid:0"/></p></body></html>','html','utf-8'))
+#将图片嵌入的html邮件 end
+#添加附件就是加上一个MIMIEBase,这里从本地读取一个图片
+# with open('2.jpg','rb') as f:
+#     mime = MIMEBase('image','jpeg',filename='test.jpg')
+#     mime.add_header('Content-Disposition','attachment',filename='test.jpg')
+#     mime.add_header('Content-ID','<0>')
+#     mime.add_header('X-Attachment-Id','0')
+#     mime.set_payload(f.read()) #把附件的内容读进来
+#     encoders.encode_base64(mime)
+#     msg.attach(mime)
+#带附件的邮件 end
+
+# msg['From'] = _format_addr('Python爱好者 <%s>' % email_config['from_addr']) #如果不使用_format_addr 则不能包含中文
+# msg['To'] = ';'.join([_format_addr('<%s>' % addr) for addr in to_list]) #如果不使用_format_addr 则不能包含中文
+# msg['Subject'] = Header('来自KMD的问候...','utf-8').encode()
+
+# 无加密的smtp start
+# server = smtplib.SMTP(email_config['smtp_addr'],25) #SMTP协议默认端口为25
+# server.set_debuglevel(1) #显示交互信息
+# server.login(email_config['from_addr'],email_config['password'])
+# server.sendmail(email_config['from_addr'],to_list,msg.as_string())
+# server.quit()
+# 无加密的smtp end
+
+# 加密的smtp start
+# 可能由于网络问题而发送失败
+# server = smtplib.SMTP('smtp.gmail.com',587) #Gmail的SMTP端口是587
+# server.starttls() #主要是增加了这个打开ssl安全连接的语句
+# server.set_debuglevel(1) #显示交互信息
+# gmail_addr = 'mendelkou@gmail.com'
+# gmail_pwd = 'koumengde/123'
+# server.login(gmail_addr,gmail_pwd)
+# server.sendmail(gmail_addr,to_list,msg.as_string())
+# server.quit()
+# 加密的smtp end
+
+#调用自定义的发送邮件模块
+# from kmdemail.myemail import sendemail
+# smtp_config = {
+#     'smtp_addr' : 'smtp.163.com',
+#     'from_addr' : 'kmd6174@163.com',
+#     'password' : 'kmd/6174'
+# }
+# sendemail(
+#     smtp_config,
+#     ctype='plain',
+#     to_list = ['kmd6174@sohu.com','mendelkou@gmail.com'],
+#     subject = 'python email 测试',
+#     content = 'Hello friends, 我在学python',
+#     attach_list=[],
+#     encoding='utf-8',
+#     debuglevel=1
+#     )
+
+# sendemail(
+#     smtp_config,
+#     ctype='html',
+#     to_list = ['kmd6174@sohu.com','mendelkou@gmail.com'],
+#     subject = 'python email 测试',
+#     content = '<html><h1>Hello friends</h1> <p>我在学python</p></html>',
+#     attach_list=[],
+#     encoding='utf-8',
+#     debuglevel=1
+#     )
+
+# sendemail(
+#     smtp_config,
+#     ctype='alternative',
+#     to_list = ['kmd6174@sohu.com','mendelkou@gmail.com'],
+#     subject = 'python email 测试',
+#     content={
+#         'plain':'我在学python',
+#         'html':'<html><h1>Hello friends</h1> <p>我在学python</p></html>'
+#     },
+#     debuglevel=1
+#     )
+
+rs = sendemail(
+    smtp_config,
+    ctype='multi',
+    to_list = ['1509102310@qq.com','kmd6174@sohu.com','mendelkou@gmail.com'],
+    subject = 'python email 测试',
+    content = 'Hello friends, 我在学python',
+    attach_list=[
+        {
+            'path':'2.jpg',
+            'type':'image',
+            'sub_type':'jpeg',
+            'filename':'image-1.jpg'
+        }
+    ],
+    debuglevel=None
+    )
+print(rs)
