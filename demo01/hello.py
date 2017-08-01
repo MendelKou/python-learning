@@ -30,7 +30,7 @@
 # print(enc)
 # print(chr(enc))
 
-# bytes = '寇梦德'.encode('utf-8')
+# bytes = '李明'.encode('utf-8')
 # print(bytes)
 # print(bytes.decode('utf-8'))
 
