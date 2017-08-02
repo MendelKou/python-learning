@@ -2259,29 +2259,29 @@ import json
 # ORM:对象关系映射 就是将数据库中的表映射为类 一行数据就是类的一个实例
 # 在Python中，最有名的ORM框架是SQLAlchemy
 # 安装SQLAlchemy的命令：pip install sqlalchemy
-from sqlalchemy import Column, String,INT,VARCHAR,CHAR ,DECIMAL,create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-# 创建表示数据表的类的基类
-Base = declarative_base()
-# 根据emp表创建Emp类
-class Emp(Base):
-    #表名
-    __tablename__ = 'emp'
-    #表的结构
-    id = Column(INT(),primary_key=True)
-    name = Column(VARCHAR(32))
-    gender = Column(CHAR(1))
-    salary = Column(DECIMAL(10,2))
-
-session = None;
-try:
-    # 初始化数据库连接
-    engine = create_engine('mysql+pymysql://root:@localhost:3306/db01?charset=utf8')
-    # 创建dbSession类型
-    DBSession = sessionmaker(bind=engine)
-    # 创建session 数据库会话
-    session = DBSession()
+# from sqlalchemy import Column, String,INT,VARCHAR,CHAR ,DECIMAL,create_engine
+# from sqlalchemy.orm import sessionmaker
+# from sqlalchemy.ext.declarative import declarative_base
+# # 创建表示数据表的类的基类
+# Base = declarative_base()
+# # 根据emp表创建Emp类
+# class Emp(Base):
+#     #表名
+#     __tablename__ = 'emp'
+#     #表的结构
+#     id = Column(INT(),primary_key=True)
+#     name = Column(VARCHAR(32))
+#     gender = Column(CHAR(1))
+#     salary = Column(DECIMAL(10,2))
+#
+# session = None;
+# try:
+#     # 初始化数据库连接
+#     engine = create_engine('mysql+pymysql://root:@localhost:3306/db01?charset=utf8')
+#     # 创建dbSession类型
+#     DBSession = sessionmaker(bind=engine)
+#     # 创建session 数据库会话
+#     session = DBSession()
 
     # 插入记录
     # emp = Emp(name='x01',gender='男',salary=897.5)
@@ -2306,10 +2306,119 @@ try:
     # session.delete(emp)
     # session.flush()
     # session.commit()
+# except Exception as e:
+#     print(e)
+# finally:
+#     if session:
+#         session.close()
 
+# python中的生成器可实现协程
+#一个简单的生成者与消费者的协程模型的实现
+# def consumer():
+#     r = ''
+#     while True:
+#         n = yield r
+#         if n:
+#             print('Consuming... %s' % n)
+#             r = '200 OK'
+#         else:
+#             return
+# def producer(c):
+#     c.send(None) #启动生成器 相当于next(c)
+#     n = 1
+#     while n <= 5:
+#         print('Produced %s' % n)
+#         r = c.send(n)
+#         print('Consumer return %s' % r)
+#         n += 1
+#     c.close()
+#
+# c = consumer()
+# producer(c)
 
-except Exception as e:
-    print(e)
-finally:
-    if session:
-        session.close()
+# syncio是Python 3.4版本引入的标准库，直接内置了对异步IO的支持
+# import asyncio
+# @asyncio.coroutine #把一个生成器标记为coroutine类型
+# def hello():
+#     print('Hello world!')
+#     r = yield from asyncio.sleep(1) #线程不会等待asyncio.sleep()，而是直接中断并执行下一个消息循环
+#     print('Hello again!')
+# # 获取EventLoop
+# loop = asyncio.get_event_loop()
+# # 执行coroutine
+# loop.run_until_complete(hello())
+# loop.close()
+
+# 用Task封装两个coroutine
+# import threading,asyncio,random
+# @asyncio.coroutine
+# def hello():
+#     n = random.randint(1,100)
+#     print('%d:Hello world! (%s)' % (n,threading.currentThread()))
+#     yield from asyncio.sleep(1)
+#     print('%d:Hello world! (%s)' % (n,threading.currentThread()))
+# loop = asyncio.get_event_loop()
+# tasks = [hello(),hello()]
+# loop.run_until_complete(asyncio.wait(tasks))
+# loop.close()
+
+# 使用异步网络获取几个网站的首页
+# import asyncio
+# def wget(host):
+#     print('wget %s...' % host)
+#     connect = asyncio.open_connection(host,80)
+#     reader,writer = yield from connect
+#     header = 'GET / HTTP/1.0\r\nHost: %s\r\n\r\n' % host
+#     writer.write(header.encode('utf-8'))
+#     yield from writer.drain()
+#     while True:
+#         line = yield from reader.readline()
+#         if line == b'\r\n':
+#             break
+#         print('%s reader > %s' % (host,line.decode('utf-8').rstrip()))
+#     writer.close()
+# loop = asyncio.get_event_loop()
+# tasks = [wget(host) for host in ['www.sina.com','www.sohu.com','www.qq.com']]
+# loop.run_until_complete(asyncio.wait(tasks))
+# loop.close()
+
+# 为了简化并更好地标识异步IO，从Python 3.5开始引入了新的语法async和await
+# async和await是针对coroutine的新语法，要使用新的语法，只需要做两步简单的替换：
+# 1)把@asyncio.coroutine替换为async；
+# 2)把yield from替换为await
+# import asyncio,threading,random
+# async def f():
+#     n = random.randint(1,1000)
+#     m = random.random()+1
+#     print('%d:%s' % (n,threading.currentThread()))
+#     await asyncio.sleep(m)
+#     print('%d:%f,%s' % (n,m,threading.currentThread()))
+# loop = asyncio.get_event_loop()
+# tasks = [f(),f()]
+# loop.run_until_complete(asyncio.wait(tasks))
+# loop.close()
+
+# syncio实现了TCP、UDP、SSL等协议，aiohttp则是基于asyncio实现的HTTP框架
+# 安装aiohttp: pip install aiohttp
+# 编写一个HTTP服务器，分别处理以下URL：
+# / - 首页返回b'<h1>Index</h1>'；
+# /hello/{name} - 根据URL参数返回文本hello, %s!
+# import asyncio
+# from aiohttp import web
+# async def index(request):
+#     await asyncio.sleep(0.5)
+#     return web.Response(body=b'<h1>Index</h1>',content_type='text/html')
+# async def hello(request):
+#     await asyncio.sleep(0.5)
+#     text = '<h1>hello, %s!</h1>' % request.match_info['name']
+#     return web.Response(body=text.encode('utf-8'),content_type='text/html')
+# async def init(loop): #init()也是一个coroutine
+#     app = web.Application(loop=loop)
+#     app.router.add_route('GET','/',index)
+#     app.router.add_route('GET','/hello/{name}',hello)
+#     srv = await loop.create_server(app.make_handler(),'127.0.0.1',8000)
+#     print('Server started at http://127.0.0.1:8000...')
+#     return srv
+# loop = asyncio.get_event_loop()
+# loop.run_until_complete(init(loop))
+# loop.run_forever()
